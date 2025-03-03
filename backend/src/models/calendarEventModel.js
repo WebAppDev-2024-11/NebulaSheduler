@@ -22,6 +22,15 @@ const CalendarEvent = sequelize.define('CalendarEvent', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    priority: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
+    status: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: 'todo', // По умолчанию задача в статусе "todo"
+    },
 });
 
 module.exports = CalendarEvent;

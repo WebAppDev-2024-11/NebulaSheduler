@@ -3,7 +3,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import "../styles.css";
 import { Button, Modal, Form, Input, Select } from "antd";
-import {getToken} from "../utils/auth";
+import { getToken } from "../utils/auth";
 
 const KanbanPage = () => {
     const [columns, setColumns] = useState({
@@ -18,13 +18,15 @@ const KanbanPage = () => {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await axios.get("http://localhost:4000/api/tasks", {headers: { Authorization: `Bearer ${getToken()}` } });
+                const response = await axios.get("http://localhost:4000/api/calendar", {
+                    headers: { Authorization: `Bearer ${getToken()}` },
+                });
                 const tasks = response.data;
 
                 const groupedTasks = {
-                    todo: tasks.filter((task) => task.status === "todo"),
-                    inProgress: tasks.filter((task) => task.status === "inProgress"),
-                    done: tasks.filter((task) => task.status === "done"),
+                    todo: tasks.filter((task) => task.status === "todo").sort((a, b) => a.priority.localeCompare(b.priority)),
+                    inProgress: tasks.filter((task) => task.status === "inProgress").sort((a, b) => a.priority.localeCompare(b.priority)),
+                    done: tasks.filter((task) => task.status === "done").sort((a, b) => a.priority.localeCompare(b.priority)),
                 };
 
                 setColumns(groupedTasks);
@@ -62,7 +64,8 @@ const KanbanPage = () => {
         }));
 
         try {
-            await axios.put(`http://localhost:4000/api/tasks/${task.id}`,
+            await axios.put(
+                `http://localhost:4000/api/calendar/${task.id}`,
                 { status: targetColumnId },
                 { headers: { Authorization: `Bearer ${getToken()}` } }
             );
@@ -79,12 +82,16 @@ const KanbanPage = () => {
 
     const handleSaveTask = async (values) => {
         try {
-            const response = await axios.post("http://localhost:4000/api/tasks", values, {headers: { Authorization: `Bearer ${getToken()}` } }) ;
+            const response = await axios.post(
+                "http://localhost:4000/api/calendar",
+                values,
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
             const newTask = response.data;
 
             setColumns((prev) => ({
                 ...prev,
-                [newTask.status]: [...prev[newTask.status], newTask],
+                [newTask.status]: [...prev[newTask.status], newTask].sort((a, b) => a.priority.localeCompare(b.priority)),
             }));
 
             setIsModalOpen(false);
@@ -122,6 +129,7 @@ const KanbanPage = () => {
                                         <div className="task-content">
                                             <strong>{task.title}</strong>
                                             <p>{task.description}</p>
+                                            <p>Priority: {task.priority}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -141,6 +149,17 @@ const KanbanPage = () => {
                         </Form.Item>
                         <Form.Item name="description" label="Description">
                             <Input.TextArea />
+                        </Form.Item>
+                        <Form.Item
+                            name="priority"
+                            label="Priority"
+                            rules={[{ required: true, message: "Please select a priority!" }]}
+                        >
+                            <Select>
+                                <Select.Option value="low">Low</Select.Option>
+                                <Select.Option value="medium">Medium</Select.Option>
+                                <Select.Option value="high">High</Select.Option>
+                            </Select>
                         </Form.Item>
                         <Form.Item
                             name="status"
@@ -164,4 +183,3 @@ const KanbanPage = () => {
 };
 
 export default KanbanPage;
-

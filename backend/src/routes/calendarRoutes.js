@@ -1,6 +1,7 @@
 const express = require('express');
 const {
-    getEvents,
+    getCalendareEvents,
+    getKanbanEvents,
     createEvent,
     updateEvent,
     deleteEvent,
@@ -10,9 +11,19 @@ const authenticateToken = require('../middlewares/authMiddlewares');
 
 const router = express.Router();
 
-router.get('/', authenticateToken, getEvents); // Проверить, что `getEvents` определена
+// Маршрут для получения событий календаря
+router.get('/calendar', authenticateToken, getCalendareEvents);
+
+// Маршрут для получения задач канбан-доски
+router.get('/kanban', authenticateToken, getKanbanEvents);
+
+// Маршрут для создания события/задачи
 router.post('/', authenticateToken, createEvent);
+
+// Маршрут для обновления события/задачи
 router.put('/:id', authenticateToken, updateEvent);
+
+// Маршрут для удаления события/задачи
 router.delete('/:id', authenticateToken, deleteEvent);
 
 module.exports = router;
